@@ -40,9 +40,18 @@ in
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = pkgs.callPackage ../package.nix { };
-      defaultText = lib.literalExpression "the Vorssaint package provided by this flake";
+      default = pkgs.vorssaint;
+      defaultText = lib.literalExpression "pkgs.vorssaint";
       description = "Vorssaint application package to install.";
+    };
+
+    launchOnActivation = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Launch Vorssaint with macOS `open` after activation. Disabled by default
+        so Home Manager activation remains non-interactive.
+      '';
     };
 
     settings = lib.mkOption {
@@ -76,21 +85,20 @@ in
     programs.vorssaint.settings.autoCheckUpdates = lib.mkDefault false;
     targets.darwin.defaults."com.vorssaint.utils" = normalSettings;
 
-    home.activation.launchVorssaint =
-      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      app="${cfg.package}/Applications/Vorssaint.app"
+    home.activation.applyVorssaintDataPreferences = lib.mkIf
+      (cfg.launchOnActivation || dataSettings != { })
+      (lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        app="${cfg.package}/Applications/Vorssaint.app"
 
-      echo "Vorssaint activation: checking $app"
+        echo "Vorssaint activation: checking $app"
 
-      if [ ! -d "$app" ]; then
-        echo "Vorssaint activation: app bundle not found" >&2
+        if [ ! -d "$app" ]; then
+          echo "Vorssaint activation: app bundle not found" >&2
           exit 1
-          fi
+        fi
 
-          echo "Vorssaint activation: invoking open"
-          ${lib.concatStringsSep "\n" dataPreferenceCommands}
-          /usr/bin/open "$app"
-          echo "Vorssaint activation: open returned $?"
-          '';
+        ${lib.concatStringsSep "\n" dataPreferenceCommands}
+        ${lib.optionalString cfg.launchOnActivation ''/usr/bin/open "$app"''}
+      '');
   };
 }
