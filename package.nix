@@ -1,6 +1,14 @@
-{ lib, stdenvNoCC, fetchurl, undmg }:
+{
+  lib,
+  stdenvNoCC,
+  fetchurl,
+  undmg,
+}:
 
 stdenvNoCC.mkDerivation rec {
+  strictDeps = true;
+  __structuredAttrs = true;
+
   pname = "vorssaint";
   version = "3.4.1";
 
@@ -30,5 +38,6 @@ stdenvNoCC.mkDerivation rec {
     license = lib.licenses.gpl3Plus;
     platforms = [ "aarch64-darwin" ];
     sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
+    maintainers = [ lib.maintainers.boborbt ];
   };
 }
