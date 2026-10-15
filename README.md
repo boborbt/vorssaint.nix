@@ -163,6 +163,21 @@ nix build github:boborbt/vorssaint.nix#vorssaint
 ```
 
 The bundle is available at `result/Applications/Vorssaint.app`. Building does not install or launch it.
+## Updating the package
+
+To check the pinned package against the latest stable Vorssaint release and
+update it when needed:
+
+```sh
+./scripts/update-vorssaint.sh
+```
+
+The script reads the release asset and its SHA-256 digest from GitHub, updates
+`package.nix`, and keeps the upstream `Defaults.swift` link in this README
+versioned with the package. Use `--check` to verify alignment without changing
+files. The package and README must not contain local Git changes when an
+update is required.
+
 
 ## License
 
